@@ -1,0 +1,102 @@
+<div class="game-container">
+  <!-- Header with Diwali decorations -->
+  <div class="header">
+    <div class="diya-decoration left">🪔</div>
+    <h1 class="game-title">Who Wants To Be<br>Diwali Millionaire</h1>
+    <div class="diya-decoration right">🪔</div>
+  </div>
+
+  <!-- Start Screen -->
+  @if (!gameStarted()) {
+    <div class="start-screen">
+      <div class="welcome-message">
+        <h2>✨ Welcome to the Festival of Lights! ✨</h2>
+        <p>Test your knowledge and win virtual prizes!</p>
+        <button class="start-button" (click)="startGame()">
+          <span class="sparkle">✨</span> Start Game <span class="sparkle">✨</span>
+        </button>
+      </div>
+      <div class="decorations">
+        <div class="rangoli">🌸 🌺 🌼 🌻 🌸</div>
+      </div>
+    </div>
+  }
+
+  <!-- Game Screen -->
+  @if (gameStarted() && !gameOver()) {
+    <div class="game-screen">
+      <div class="main-area">
+        <!-- Question Display -->
+        <div class="question-container">
+          <div class="question-number">
+            Question {{ currentQuestionIndex() + 1 }} of {{ questions().length }}
+          </div>
+          <div class="question-text">
+            {{ getCurrentQuestion()?.question }}
+          </div>
+        </div>
+
+        <!-- Answer Options -->
+        <div class="answers-grid">
+          @for (option of getCurrentQuestion()?.options; track option; let i = $index) {
+            <button 
+              class="answer-button"
+              [class.selected]="selectedAnswer() === i"
+              [class.correct]="selectedAnswer() === i && answeredCorrectly()"
+              [class.wrong]="selectedAnswer() === i && !answeredCorrectly() && selectedAnswer() !== null"
+              [disabled]="selectedAnswer() !== null"
+              (click)="selectAnswer(i)">
+              <span class="option-letter">{{ ['A', 'B', 'C', 'D'][i] }}:</span>
+              <span class="option-text">{{ option }}</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Money Ladder -->
+      <div class="sidebar">
+        <div class="money-ladder">
+          <h3>Prize Ladder</h3>
+          @for (level of moneyLadder(); track level.amount) {
+            <div 
+              class="money-level"
+              [class.current]="level.current"
+              [class.reached]="level.reached">
+              {{ level.amount }}
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Game Over Screen -->
+  @if (gameOver()) {
+    <div class="game-over-screen">
+      <div class="result-message">
+        @if (currentQuestionIndex() === questions().length) {
+          <h2>🎉 Congratulations! 🎉</h2>
+          <p>You've won the game!</p>
+          <div class="final-prize">{{ getCurrentPrize() }}</div>
+        } @else {
+          <h2>Game Over</h2>
+          <p>You won:</p>
+          <div class="final-prize">{{ getCurrentPrize() }}</div>
+        }
+        <button class="restart-button" (click)="resetGame()">
+          Play Again
+        </button>
+      </div>
+      <div class="fireworks">🎆 🎇 ✨ 🎆 🎇</div>
+    </div>
+  }
+
+  <!-- Footer decoration -->
+  <div class="footer-decoration">
+    <span>��</span>
+    <span>✨</span>
+    <span>🎆</span>
+    <span>✨</span>
+    <span>🪔</span>
+  </div>
+</div>
