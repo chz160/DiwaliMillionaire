@@ -30,22 +30,27 @@ export class App implements OnInit {
   questions = signal<Question[]>([]);
   
   moneyLadder = signal<MoneyLevel[]>([
-    { amount: '₹10,00,000', reached: false, current: false },
-    { amount: '₹5,00,000', reached: false, current: false },
-    { amount: '₹2,50,000', reached: false, current: false },
-    { amount: '₹1,00,000', reached: false, current: false },
-    { amount: '₹50,000', reached: false, current: false },
-    { amount: '₹25,000', reached: false, current: false },
-    { amount: '₹10,000', reached: false, current: false },
-    { amount: '₹5,000', reached: false, current: false },
-    { amount: '₹2,500', reached: false, current: false },
-    { amount: '₹1,000', reached: false, current: true }
+    { amount: '₹10,00,000', reached: false, current: false },   // Q15
+    { amount: '₹5,00,000', reached: false, current: false },    // Q14
+    { amount: '₹2,50,000', reached: false, current: false },    // Q13
+    { amount: '₹1,25,000', reached: false, current: false },    // Q12
+    { amount: '₹80,000', reached: false, current: false },      // Q11
+    { amount: '₹40,000', reached: false, current: false },      // Q10
+    { amount: '₹20,000', reached: false, current: false },      // Q9
+    { amount: '₹10,000', reached: false, current: false },      // Q8
+    { amount: '₹5,000', reached: false, current: false },       // Q7
+    { amount: '₹3,000', reached: false, current: false },       // Q6
+    { amount: '₹2,000', reached: false, current: false },       // Q5
+    { amount: '₹1,500', reached: false, current: false },       // Q4
+    { amount: '₹1,000', reached: false, current: false },       // Q3
+    { amount: '₹500', reached: false, current: false },         // Q2
+    { amount: '₹0', reached: false, current: true }             // Q1
   ]);
   
   ngOnInit() {
     this.questionsService.loadQuestions().subscribe(questions => {
-      const sortedQuestions = this.questionsService.sortQuestionsByDifficulty(questions);
-      this.questions.set(sortedQuestions);
+      const selectedQuestions = this.questionsService.selectQuestionsWithProgression(questions);
+      this.questions.set(selectedQuestions);
     });
   }
   
