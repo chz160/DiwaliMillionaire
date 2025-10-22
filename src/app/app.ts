@@ -239,6 +239,14 @@ export class App implements OnInit, AfterViewInit {
     this.sessionResult.set(result);
     this.gameOver.set(true);
     
+    // Delete saved state when game ends to prevent resuming a finished game
+    const gameKey = this.currentGameKey();
+    if (gameKey) {
+      this.persistenceService.deleteState(gameKey).catch(error => {
+        console.error('Failed to delete game state on game end:', error);
+      });
+    }
+    
     // Emit analytics event
     this.emitAnalyticsEvent(result);
   }
