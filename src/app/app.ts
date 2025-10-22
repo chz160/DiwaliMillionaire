@@ -9,6 +9,7 @@ import { GameSummaryComponent } from './game-summary.component';
 import { environment } from '../environments/environment';
 import { GameStatePersistenceService, GameState } from './game-state-persistence.service';
 import { GameUrlService } from './game-url.service';
+import { shuffleOptions } from './seeded-random.util';
 
 interface MoneyLevel {
   amount: string;
@@ -46,6 +47,9 @@ export class App implements OnInit, AfterViewInit {
   answeredCorrectly = signal(false);
   
   questions = signal<Question[]>([]);
+  
+  // Render order for each question (indices 0-3 shuffled)
+  renderOrder = signal<number[][]>([]);
   
   // Session result for summary screen
   sessionResult = signal<GameSessionResult | null>(null);
@@ -116,33 +120,45 @@ export class App implements OnInit, AfterViewInit {
     this.currentGameKey.set(gameKey);
     this.urlService.setGameKeyInUrl(gameKey);
     
+    // Generate render order for all questions
+    const questions = this.questions();
+    const renderOrderForSession = questions.map(q => 
+      shuffleOptions(gameKey, q.id)
+    );
+    this.renderOrder.set(renderOrderForSession);
+    
     // Create and save initial game state
     const initialState = this.persistenceService.createInitialState(
       gameKey,
-      this.questions()
+      questions,
+      renderOrderForSession
     );
     this.persistenceService.scheduleSave(initialState);
   }
   
-  selectAnswer(index: number) {
+  selectAnswer(renderedIndex: number) {
     if (this.selectedAnswer() !== null) return;
-    this.selectedAnswer.set(index);
+    this.selectedAnswer.set(renderedIndex);
     
     setTimeout(() => {
       const currentQuestion = this.questions()[this.currentQuestionIndex()];
-      const isCorrect = index === currentQuestion.correctAnswer;
+      const questionRenderOrder = this.renderOrder()[this.currentQuestionIndex()];
+      
+      // Map rendered index to original option index
+      const originalIndex = questionRenderOrder[renderedIndex];
+      const isCorrect = originalIndex === currentQuestion.correctAnswer;
       this.answeredCorrectly.set(isCorrect);
       
-      // Record the answered question
+      // Record the answered question with both rendered and original indices
       const questionIndex = this.currentQuestionIndex();
       const answeredQuestion: AnsweredQuestion = {
         questionId: currentQuestion.id,
         correct: isCorrect,
-        chosenOption: index,
-        correctOption: currentQuestion.correctAnswer,
+        chosenOption: renderedIndex,  // Store rendered position
+        correctOption: questionRenderOrder.indexOf(currentQuestion.correctAnswer), // Rendered position of correct answer
         difficulty: currentQuestion.difficulty,
         question: currentQuestion.question,
-        options: currentQuestion.options,
+        options: questionRenderOrder.map(idx => currentQuestion.options[idx]), // Store shuffled options
         prize: this.prizeLadderService.getPrizeForQuestion(questionIndex + 1)
       };
       
@@ -299,6 +315,19 @@ export class App implements OnInit, AfterViewInit {
     const index = this.currentQuestionIndex();
     return index < questions.length ? questions[index] : null;
   }
+
+  /**
+   * Get the options for the current question in rendered (shuffled) order
+   */
+  getRenderedOptions(): string[] {
+    const question = this.getCurrentQuestion();
+    if (!question) return [];
+    
+    const questionRenderOrder = this.renderOrder()[this.currentQuestionIndex()];
+    if (!questionRenderOrder) return question.options;
+    
+    return questionRenderOrder.map(idx => question.options[idx]);
+  }
   
   getCurrentPrize(): string {
     const questionsAnswered = this.currentQuestionIndex();
@@ -329,8 +358,16 @@ export class App implements OnInit, AfterViewInit {
     const currentQuestion = this.getCurrentQuestion();
     if (!currentQuestion) return;
     
-    const toRemove = this.lifelineService.useFiftyFifty(currentQuestion);
-    this.removedOptions.set(toRemove);
+    // Get the original indices to remove
+    const toRemoveOriginal = this.lifelineService.useFiftyFifty(currentQuestion);
+    
+    // Map original indices to rendered positions
+    const questionRenderOrder = this.renderOrder()[this.currentQuestionIndex()];
+    const toRemoveRendered = toRemoveOriginal.map(originalIdx => 
+      questionRenderOrder.indexOf(originalIdx)
+    );
+    
+    this.removedOptions.set(toRemoveRendered);
     this.lifelinesUsed.update(state => ({ ...state, fiftyFifty: true }));
     
     // Save state after using lifeline
@@ -343,8 +380,17 @@ export class App implements OnInit, AfterViewInit {
     const currentQuestion = this.getCurrentQuestion();
     if (!currentQuestion) return;
     
-    const votes = this.lifelineService.useAskAudience(currentQuestion);
-    this.audienceVotes.set(votes);
+    // Get votes based on original question
+    const votesOriginal = this.lifelineService.useAskAudience(currentQuestion);
+    
+    // Map votes to rendered positions
+    const questionRenderOrder = this.renderOrder()[this.currentQuestionIndex()];
+    const votesRendered = votesOriginal.map(vote => ({
+      optionIndex: questionRenderOrder.indexOf(vote.optionIndex),
+      percentage: vote.percentage
+    }));
+    
+    this.audienceVotes.set(votesRendered);
     this.lifelinesUsed.update(state => ({ ...state, askAudience: true }));
     
     // Save state after using lifeline
@@ -357,8 +403,17 @@ export class App implements OnInit, AfterViewInit {
     const currentQuestion = this.getCurrentQuestion();
     if (!currentQuestion) return;
     
-    const hint = this.lifelineService.usePhoneFriend(currentQuestion);
-    this.phoneFriendHint.set(hint);
+    // Get hint based on original question
+    const hintOriginal = this.lifelineService.usePhoneFriend(currentQuestion);
+    
+    // Map hint to rendered position
+    const questionRenderOrder = this.renderOrder()[this.currentQuestionIndex()];
+    const hintRendered = {
+      suggestedAnswer: questionRenderOrder.indexOf(hintOriginal.suggestedAnswer),
+      confidence: hintOriginal.confidence
+    };
+    
+    this.phoneFriendHint.set(hintRendered);
     this.lifelinesUsed.update(state => ({ ...state, phoneFriend: true }));
     
     // Save state after using lifeline
@@ -419,7 +474,8 @@ export class App implements OnInit, AfterViewInit {
       timerStartTime: null,
       timerDuration: null,
       soundEnabled: true,
-      lastSaved: Date.now()
+      lastSaved: Date.now(),
+      renderOrder: this.renderOrder()
     };
 
     this.persistenceService.scheduleSave(state);
@@ -436,6 +492,7 @@ export class App implements OnInit, AfterViewInit {
         // Restore game state
         this.currentGameKey.set(gameKey);
         this.questions.set(savedState.questions);
+        this.renderOrder.set(savedState.renderOrder);
         this.currentQuestionIndex.set(savedState.currentQuestionIndex);
         this.lifelinesUsed.set(savedState.lifelinesUsed);
         this.removedOptions.set(savedState.removedOptions);
