@@ -26,6 +26,39 @@
   @if (gameStarted() && !gameOver()) {
     <div class="game-screen">
       <div class="main-area">
+        <!-- Lifeline Panel -->
+        <div class="lifeline-panel">
+          <button 
+            class="lifeline-button"
+            [class.used]="lifelinesUsed().fiftyFifty"
+            [disabled]="lifelinesUsed().fiftyFifty || selectedAnswer() !== null"
+            (click)="useFiftyFifty()"
+            title="50:50 - Remove two incorrect answers">
+            <span class="lifeline-icon">50:50</span>
+            <span class="lifeline-label">50:50</span>
+          </button>
+          
+          <button 
+            class="lifeline-button"
+            [class.used]="lifelinesUsed().askAudience"
+            [disabled]="lifelinesUsed().askAudience || selectedAnswer() !== null"
+            (click)="useAskAudience()"
+            title="Ask the Audience">
+            <span class="lifeline-icon">👥</span>
+            <span class="lifeline-label">Audience</span>
+          </button>
+          
+          <button 
+            class="lifeline-button"
+            [class.used]="lifelinesUsed().phoneFriend"
+            [disabled]="lifelinesUsed().phoneFriend || selectedAnswer() !== null"
+            (click)="usePhoneFriend()"
+            title="Phone a Friend">
+            <span class="lifeline-icon">📞</span>
+            <span class="lifeline-label">Phone</span>
+          </button>
+        </div>
+
         <!-- Question Display -->
         <div class="question-container">
           <div class="question-number">
@@ -36,6 +69,17 @@
           </div>
         </div>
 
+        <!-- Phone a Friend Hint -->
+        @if (phoneFriendHint()) {
+          <div class="phone-hint">
+            <div class="phone-hint-title">📞 Your Friend Says:</div>
+            <div class="phone-hint-text">
+              "{{ phoneFriendHint()!.confidence }} 
+              <strong>{{ ['A', 'B', 'C', 'D'][phoneFriendHint()!.suggestedAnswer] }}</strong>."
+            </div>
+          </div>
+        }
+
         <!-- Answer Options -->
         <div class="answers-grid">
           @for (option of getCurrentQuestion()?.options; track option; let i = $index) {
@@ -44,13 +88,36 @@
               [class.selected]="selectedAnswer() === i"
               [class.correct]="selectedAnswer() === i && answeredCorrectly()"
               [class.wrong]="selectedAnswer() === i && !answeredCorrectly() && selectedAnswer() !== null"
-              [disabled]="selectedAnswer() !== null"
+              [class.removed]="isOptionRemoved(i)"
+              [class.highlighted]="phoneFriendHint()?.suggestedAnswer === i"
+              [disabled]="selectedAnswer() !== null || isOptionRemoved(i)"
               (click)="selectAnswer(i)">
               <span class="option-letter">{{ ['A', 'B', 'C', 'D'][i] }}:</span>
               <span class="option-text">{{ option }}</span>
+              @if (audienceVotes()) {
+                <span class="audience-vote">{{ getAudienceVotePercentage(i) }}%</span>
+              }
             </button>
           }
         </div>
+
+        <!-- Audience Chart -->
+        @if (audienceVotes()) {
+          <div class="audience-chart">
+            <div class="audience-chart-title">👥 Audience Says:</div>
+            <div class="audience-bars">
+              @for (vote of audienceVotes(); track vote.optionIndex) {
+                <div class="audience-bar-container">
+                  <div class="audience-bar-label">{{ ['A', 'B', 'C', 'D'][vote.optionIndex] }}</div>
+                  <div class="audience-bar-wrapper">
+                    <div class="audience-bar" [style.width.%]="vote.percentage"></div>
+                  </div>
+                  <div class="audience-bar-percentage">{{ vote.percentage }}%</div>
+                </div>
+              }
+            </div>
+          </div>
+        }
       </div>
 
       <!-- Money Ladder -->
