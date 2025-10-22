@@ -65,7 +65,7 @@ describe('CloudflareAnalyticsInit', () => {
     expect(beaconData).toBe(JSON.stringify({ token: testToken }));
 
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      'Cloudflare Analytics initialized with token: test-tok...'
+      'Cloudflare Analytics initialized with token: test-t...'
     );
   });
 
@@ -74,7 +74,7 @@ describe('CloudflareAnalyticsInit', () => {
     initializeCloudflareAnalytics(testToken);
 
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      'Cloudflare Analytics initialized with token: abcdefgh...'
+      'Cloudflare Analytics initialized with token: abcdef...'
     );
   });
 

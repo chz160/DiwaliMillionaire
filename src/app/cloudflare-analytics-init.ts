@@ -25,7 +25,7 @@ export function initializeCloudflareAnalytics(cfAnalyticsToken: string): void {
     // Append to head
     document.head.appendChild(script);
 
-    console.log(`Cloudflare Analytics initialized with token: ${cfAnalyticsToken.substring(0, 8)}...`);
+    console.log(`Cloudflare Analytics initialized with token: ${cfAnalyticsToken.substring(0, 6)}...`);
   } catch (error) {
     console.error('Error initializing Cloudflare Analytics:', error);
   }
