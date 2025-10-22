@@ -1,6 +1,7 @@
 import { Component, signal, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { QuestionsService, Question } from './questions.service';
+import { environment } from '../environments/environment';
 
 interface MoneyLevel {
   amount: string;
@@ -18,6 +19,7 @@ export class App implements OnInit {
   private questionsService = inject(QuestionsService);
   
   protected readonly title = signal('Who Wants To Be Diwali Millionaire');
+  protected readonly version = environment.version;
   
   currentQuestionIndex = signal(0);
   gameStarted = signal(false);
