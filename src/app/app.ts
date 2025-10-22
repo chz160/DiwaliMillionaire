@@ -2,12 +2,14 @@ import { Component, signal, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { QuestionsService, Question } from './questions.service';
 import { LifelineService, LifelineState, AudienceVote, PhoneFriendHint } from './lifeline.service';
+import { PrizeLadderService, PrizeLadderLevel } from './prize-ladder.service';
 import { environment } from '../environments/environment';
 
 interface MoneyLevel {
   amount: string;
   reached: boolean;
   current: boolean;
+  isCheckpoint: boolean;
 }
 
 @Component({
@@ -19,6 +21,7 @@ interface MoneyLevel {
 export class App implements OnInit {
   private questionsService = inject(QuestionsService);
   private lifelineService = inject(LifelineService);
+  private prizeLadderService = inject(PrizeLadderService);
   
   protected readonly title = signal('Who Wants To Be Diwali Millionaire');
   protected readonly version = environment.version;
@@ -43,29 +46,30 @@ export class App implements OnInit {
   audienceVotes = signal<AudienceVote[] | null>(null);
   phoneFriendHint = signal<PhoneFriendHint | null>(null);
   
-  moneyLadder = signal<MoneyLevel[]>([
-    { amount: '₹10,00,000', reached: false, current: false },   // Q15
-    { amount: '₹5,00,000', reached: false, current: false },    // Q14
-    { amount: '₹2,50,000', reached: false, current: false },    // Q13
-    { amount: '₹1,25,000', reached: false, current: false },    // Q12
-    { amount: '₹80,000', reached: false, current: false },      // Q11
-    { amount: '₹40,000', reached: false, current: false },      // Q10
-    { amount: '₹20,000', reached: false, current: false },      // Q9
-    { amount: '₹10,000', reached: false, current: false },      // Q8
-    { amount: '₹5,000', reached: false, current: false },       // Q7
-    { amount: '₹3,000', reached: false, current: false },       // Q6
-    { amount: '₹2,000', reached: false, current: false },       // Q5
-    { amount: '₹1,500', reached: false, current: false },       // Q4
-    { amount: '₹1,000', reached: false, current: false },       // Q3
-    { amount: '₹500', reached: false, current: false },         // Q2
-    { amount: '₹0', reached: false, current: true }             // Q1
-  ]);
+  moneyLadder = signal<MoneyLevel[]>([]);
   
   ngOnInit() {
     this.questionsService.loadQuestions().subscribe(questions => {
       const selectedQuestions = this.questionsService.selectQuestionsWithProgression(questions);
       this.questions.set(selectedQuestions);
     });
+    
+    // Initialize money ladder from prize ladder service
+    this.initializeMoneyLadder();
+  }
+  
+  private initializeMoneyLadder() {
+    const levels = this.prizeLadderService.getLevels();
+    const moneyLevels: MoneyLevel[] = levels
+      .map((level, index) => ({
+        amount: level.prize,
+        reached: false,
+        current: index === 0, // First question is current initially
+        isCheckpoint: level.isCheckpoint
+      }))
+      .reverse(); // Reverse to show highest prize at top
+    
+    this.moneyLadder.set(moneyLevels);
   }
   
   startGame() {
@@ -91,6 +95,8 @@ export class App implements OnInit {
         setTimeout(() => this.nextQuestion(), 1500);
       } else {
         this.answeredCorrectly.set(false);
+        // Use checkpoint logic to determine final prize
+        // The guaranteed prize is based on the last checkpoint passed
         setTimeout(() => this.endGame(), 1500);
       }
     }, 1000);
@@ -130,6 +136,11 @@ export class App implements OnInit {
     this.gameOver.set(true);
   }
   
+  walkAway() {
+    // Player chooses to walk away with current prize
+    this.gameOver.set(true);
+  }
+  
   resetGame() {
     this.gameStarted.set(false);
     this.gameOver.set(false);
@@ -137,15 +148,7 @@ export class App implements OnInit {
     this.selectedAnswer.set(null);
     this.answeredCorrectly.set(false);
     this.resetLifelines();
-    this.moneyLadder.set(this.moneyLadder().map(level => ({
-      ...level,
-      current: false,
-      reached: false
-    })));
-    this.moneyLadder.update(ladder => {
-      ladder[ladder.length - 1].current = true;
-      return [...ladder];
-    });
+    this.initializeMoneyLadder();
   }
   
   getCurrentQuestion(): Question | null {
@@ -155,10 +158,24 @@ export class App implements OnInit {
   }
   
   getCurrentPrize(): string {
-    const ladder = this.moneyLadder();
-    const reached = ladder.filter(l => l.reached);
-    // Return the highest prize reached (first in the filtered array since ladder is top-down)
-    return reached.length > 0 ? reached[0].amount : '₹0';
+    const questionsAnswered = this.currentQuestionIndex();
+    const answeredCorrectly = this.answeredCorrectly();
+    
+    // If we answered the last question correctly, return the prize for that question
+    // Otherwise, return the guaranteed prize (checkpoint logic)
+    if (answeredCorrectly && questionsAnswered >= this.questions().length) {
+      // Won the game - return the final prize
+      return this.prizeLadderService.getCurrentPrize(questionsAnswered);
+    } else if (!answeredCorrectly && this.gameOver()) {
+      // Answered incorrectly - return guaranteed prize based on checkpoints
+      return this.prizeLadderService.getGuaranteedPrize(
+        questionsAnswered + 1, // Current question number (1-based)
+        questionsAnswered // Questions answered correctly so far
+      );
+    } else {
+      // Walking away or still playing - return current prize
+      return this.prizeLadderService.getCurrentPrize(questionsAnswered);
+    }
   }
   
   // Lifeline methods
