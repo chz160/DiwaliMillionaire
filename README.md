@@ -77,6 +77,8 @@ set GA_MEASUREMENT_ID=G-XXXXXXXXXX && npm run build
 
 For deployment platforms (Netlify, Vercel, GitHub Pages, etc.), set the environment variable in your platform's settings.
 
+**For Cloudflare Pages**: See the detailed [Cloudflare Pages Setup Guide](./CLOUDFLARE_PAGES_SETUP.md) for step-by-step instructions on configuring environment variables.
+
 ### Testing
 
 Run unit tests:
