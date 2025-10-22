@@ -29,10 +29,14 @@ function generateVersion() {
 // Generate the version
 const version = generateVersion();
 
+// Get GA_MEASUREMENT_ID from environment variable (if set)
+const gaMeasurementId = process.env.GA_MEASUREMENT_ID || '';
+
 // Create the environment file content
 const envFileContent = `// This file is auto-generated during build. Do not edit manually.
 export const environment = {
-  version: '${version}'
+  version: '${version}',
+  gaMeasurementId: '${gaMeasurementId}'
 };
 `;
 

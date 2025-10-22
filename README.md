@@ -30,6 +30,18 @@ cd DiwaliMillionaire
 npm install
 ```
 
+3. Set up environment variables (optional):
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and add your Google Analytics measurement ID if you want to track usage analytics:
+```
+GA_MEASUREMENT_ID=G-XXXXXXXXXX
+```
+
+**Note:** Analytics tracking is optional. If `GA_MEASUREMENT_ID` is not set, the application will run without analytics. Analytics will also not load if the user has "Do Not Track" enabled in their browser.
+
 ### Development
 
 Run the development server:
@@ -47,6 +59,23 @@ npm run build
 ```
 
 The build artifacts will be stored in the `dist/` directory.
+
+**Environment Variables for Production:**
+
+When building for production, you can set the `GA_MEASUREMENT_ID` environment variable:
+
+```bash
+# Linux/macOS
+GA_MEASUREMENT_ID=G-XXXXXXXXXX npm run build
+
+# Windows (PowerShell)
+$env:GA_MEASUREMENT_ID="G-XXXXXXXXXX"; npm run build
+
+# Windows (CMD)
+set GA_MEASUREMENT_ID=G-XXXXXXXXXX && npm run build
+```
+
+For deployment platforms (Netlify, Vercel, GitHub Pages, etc.), set the environment variable in your platform's settings.
 
 ### Testing
 
@@ -101,6 +130,40 @@ moneyLadder = signal<MoneyLevel[]>([
 - **TypeScript**: Type-safe JavaScript
 - **CSS**: Custom styling with animations
 - **Standalone Components**: Using Angular's latest component architecture
+- **Google Analytics 4** (optional): Usage tracking and event analytics
+
+## Analytics & Privacy
+
+This application supports optional Google Analytics 4 (GA4) integration for tracking game usage and engagement metrics. Analytics tracking:
+
+- **Is completely optional** - the app works perfectly without it
+- **Requires explicit configuration** via the `GA_MEASUREMENT_ID` environment variable
+- **Respects user privacy** by:
+  - Honoring "Do Not Track" browser settings
+  - Anonymizing IP addresses
+  - Truncating game keys to prevent identification
+  - Not collecting any personally identifiable information (PII)
+
+### Tracked Events
+
+When analytics is enabled, the following events are tracked:
+
+- **game_start**: When a new game begins
+- **game_end**: When a game concludes (with outcome: win, walk_away, or wrong_answer)
+- **lifeline_used**: When a lifeline is used (fifty_fifty, ask_audience, or phone_friend)
+- **question_progress**: As players progress through questions
+
+### Setting Up Analytics
+
+1. Create a Google Analytics 4 property at [analytics.google.com](https://analytics.google.com)
+2. Get your Measurement ID (format: `G-XXXXXXXXXX`)
+3. Set the environment variable:
+   - For local development: Add to `.env` file
+   - For production builds: Set as environment variable during build
+   - For deployment platforms: Configure in platform settings
+4. Build and deploy your application
+
+Analytics will automatically initialize if the measurement ID is present and Do Not Track is not enabled.
 
 ## Future Enhancements
 
