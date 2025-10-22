@@ -186,6 +186,40 @@ If `process.env.GA_MEASUREMENT_ID` is empty during build:
 3. **Redeploy**: Environment variable changes require a new build
 4. **Check build command**: Ensure `npm run build` is used (which triggers prebuild)
 
+### Analytics Requests Blocked (ERR_BLOCKED_BY_CLIENT)
+
+If you see the initialization message but requests fail with `net::ERR_BLOCKED_BY_CLIENT`:
+
+**Cause**: This error indicates that a **browser extension or built-in blocker** is blocking Google Analytics requests. This is a client-side issue, not a problem with the code.
+
+**Common blockers:**
+- Ad blockers (uBlock Origin, Adblock Plus, etc.)
+- Privacy extensions (Privacy Badger, Ghostery, etc.)
+- Built-in browser tracking protection
+- DNS-level ad blockers (Pi-hole, NextDNS, etc.)
+- Corporate/Network firewalls
+
+**Solutions:**
+
+1. **For Testing**:
+   - Disable browser extensions temporarily
+   - Use incognito/private mode without extensions
+   - Try a different browser without extensions
+   - Whitelist your domain in the ad blocker settings
+
+2. **For Production**:
+   - This is expected behavior for users with ad blockers
+   - Analytics will work for users without blockers
+   - Consider this normal - many users block analytics
+   - Alternative: Use privacy-friendly analytics (Plausible, Fathom, etc.)
+
+3. **Verification**:
+   - The fact that you see "Google Analytics initialized with ID: G-XXXXXXXXXX" confirms the code is working correctly
+   - The blocking happens after initialization, at the network request level
+   - Your implementation is correct; this is the blocker doing its job
+
+**Note**: This is **not** a bug in your code. The application initializes Google Analytics correctly, but the browser/extension prevents the data from being sent to Google's servers.
+
 ## Alternative Approach: Runtime Configuration
 
 **Note**: The current implementation (build-time) is the **recommended approach** for Cloudflare Pages. However, if runtime configuration is needed:

@@ -162,6 +162,22 @@ Run the verification script:
 
 This script performs all necessary checks to confirm Cloudflare Pages compatibility.
 
+## Common Issues and Solutions
+
+### Issue: Analytics Requests Blocked (ERR_BLOCKED_BY_CLIENT)
+
+**Symptom**: Console shows `Google Analytics initialized with ID: G-XXXXXXXXXX` but network requests fail with `net::ERR_BLOCKED_BY_CLIENT`
+
+**Cause**: Browser extension or built-in blocker is preventing Google Analytics requests.
+
+**Solution**: 
+- ✅ **Your code is working correctly** - the initialization message confirms this
+- The blocking occurs at the browser/network level, not in your code
+- For testing: Disable extensions, use incognito mode, or try a different browser
+- For production: This is expected behavior for users with ad blockers; analytics will work for users without them
+
+**Note**: Seeing both the initialization message AND the blocked request confirms your implementation is correct. The blocker is doing its job after your code successfully initializes GA.
+
 ---
 
 **Prepared by**: GitHub Copilot  
