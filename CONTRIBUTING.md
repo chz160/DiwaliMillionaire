@@ -10,8 +10,8 @@ Thank you for your interest in contributing to the Diwali Millionaire project!
 
 2. **Installation**
    ```bash
-   git clone https://github.com/chz160/DiwaliMillionare.git
-   cd DiwaliMillionare
+   git clone https://github.com/chz160/DiwaliMillionaire.git
+   cd DiwaliMillionaire
    npm install
    ```
 
