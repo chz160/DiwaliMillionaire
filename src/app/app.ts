@@ -1,11 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-interface Question {
-  question: string;
-  options: string[];
-  correctAnswer: number;
-}
+import { QuestionsService, Question } from './questions.service';
 
 interface MoneyLevel {
   amount: string;
@@ -19,7 +14,9 @@ interface MoneyLevel {
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
+export class App implements OnInit {
+  private questionsService = inject(QuestionsService);
+  
   protected readonly title = signal('Who Wants To Be Diwali Millionaire');
   
   currentQuestionIndex = signal(0);
@@ -28,23 +25,7 @@ export class App {
   selectedAnswer = signal<number | null>(null);
   answeredCorrectly = signal(false);
   
-  questions = signal<Question[]>([
-    {
-      question: 'What is the main festival of lights celebrated in India?',
-      options: ['Holi', 'Diwali', 'Navratri', 'Dussehra'],
-      correctAnswer: 1
-    },
-    {
-      question: 'Which Hindu deity is primarily worshipped during Diwali?',
-      options: ['Shiva', 'Ganesha', 'Lakshmi', 'Krishna'],
-      correctAnswer: 2
-    },
-    {
-      question: 'How many days does Diwali typically last?',
-      options: ['3 days', '5 days', '7 days', '10 days'],
-      correctAnswer: 1
-    }
-  ]);
+  questions = signal<Question[]>([]);
   
   moneyLadder = signal<MoneyLevel[]>([
     { amount: '₹10,00,000', reached: false, current: false },
@@ -58,6 +39,13 @@ export class App {
     { amount: '₹2,500', reached: false, current: false },
     { amount: '₹1,000', reached: false, current: true }
   ]);
+  
+  ngOnInit() {
+    this.questionsService.loadQuestions().subscribe(questions => {
+      const sortedQuestions = this.questionsService.sortQuestionsByDifficulty(questions);
+      this.questions.set(sortedQuestions);
+    });
+  }
   
   startGame() {
     this.gameStarted.set(true);
