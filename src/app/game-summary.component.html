@@ -1,31 +1,33 @@
-<div class="game-summary-container">
+<div class="game-summary-container" role="region" aria-label="Game Summary">
   <div class="summary-screen">
     <!-- Headline -->
-    <div class="summary-header">
-      <h2 class="summary-headline">{{ getHeadline() }}</h2>
+    <div class="summary-header" role="banner">
+      <h2 class="summary-headline" aria-live="polite">{{ getHeadline() }}</h2>
       <div class="summary-subheadline">
-        <span class="end-reason">{{ getEndReasonDescription() }}</span>
-        <span class="question-reached"> • Reached Q{{ getStatistics().highestQuestion }}/{{ result.totalQuestions }}</span>
+        <span class="end-reason" aria-label="End reason">{{ getEndReasonDescription() }}</span>
+        <span class="question-reached" aria-label="Progress"> • Reached Q{{ getStatistics().highestQuestion }}/{{ result.totalQuestions }}</span>
       </div>
     </div>
 
     <!-- Prize Display -->
-    <div class="final-prize-display">
+    <div class="final-prize-display" role="status" aria-label="Final winnings">
       <div class="prize-label">Final Winnings</div>
       <div class="final-prize-amount">{{ result.finalPrize }}</div>
     </div>
 
     <!-- Progress Ladder -->
     <div class="progress-section">
-      <h3>Your Progress</h3>
-      <div class="ladder-progress">
+      <h3 id="progress-heading">Your Progress</h3>
+      <div class="ladder-progress" role="list" aria-labelledby="progress-heading">
         @for (question of result.answeredQuestions; track question.questionId; let i = $index) {
           <div class="ladder-step" 
+               role="listitem"
                [class.correct]="question.correct"
-               [class.incorrect]="!question.correct">
+               [class.incorrect]="!question.correct"
+               [attr.aria-label]="'Question ' + (i + 1) + ': ' + (question.correct ? 'Correct' : 'Incorrect') + ', ' + question.prize">
             <span class="step-number">Q{{ i + 1 }}</span>
             <span class="step-prize">{{ question.prize }}</span>
-            <span class="step-indicator">{{ question.correct ? '✅' : '❌' }}</span>
+            <span class="step-indicator" aria-hidden="true">{{ question.correct ? '✅' : '❌' }}</span>
           </div>
         }
       </div>
@@ -33,52 +35,64 @@
 
     <!-- Statistics -->
     <div class="stats-section">
-      <h3>Session Statistics</h3>
-      <div class="stats-grid">
-        <div class="stat-item">
+      <h3 id="stats-heading">Session Statistics</h3>
+      <div class="stats-grid" role="list" aria-labelledby="stats-heading">
+        <div class="stat-item" role="listitem">
           <div class="stat-label">Correct Answers</div>
-          <div class="stat-value">{{ getStatistics().correctAnswers }} / {{ getStatistics().totalAttempted }}</div>
+          <div class="stat-value" aria-label="{{ getStatistics().correctAnswers }} out of {{ getStatistics().totalAttempted }} correct">{{ getStatistics().correctAnswers }} / {{ getStatistics().totalAttempted }}</div>
         </div>
-        <div class="stat-item">
+        <div class="stat-item" role="listitem">
           <div class="stat-label">Accuracy</div>
-          <div class="stat-value">{{ getStatistics().accuracy }}%</div>
+          <div class="stat-value" aria-label="{{ getStatistics().accuracy }} percent accuracy">{{ getStatistics().accuracy }}%</div>
         </div>
-        <div class="stat-item">
+        <div class="stat-item" role="listitem">
           <div class="stat-label">Highest Question</div>
-          <div class="stat-value">Q{{ getStatistics().highestQuestion }}</div>
+          <div class="stat-value" aria-label="Reached question {{ getStatistics().highestQuestion }}">Q{{ getStatistics().highestQuestion }}</div>
         </div>
       </div>
     </div>
 
     <!-- Lifelines Usage -->
     <div class="lifelines-section">
-      <h3>Lifelines Used</h3>
-      <div class="lifelines-grid">
-        <div class="lifeline-stat" [class.used]="result.usedLifelines.fiftyFifty">
-          <span class="lifeline-icon">{{ getLifelineIcon('fiftyFifty') }}</span>
+      <h3 id="lifelines-heading">Lifelines Used</h3>
+      <div class="lifelines-grid" role="list" aria-labelledby="lifelines-heading">
+        <div class="lifeline-stat" 
+             role="listitem"
+             [class.used]="result.usedLifelines.fiftyFifty"
+             [attr.aria-label]="'50:50 lifeline: ' + (result.usedLifelines.fiftyFifty ? 'Used' : 'Not used')">
+          <span class="lifeline-icon" aria-hidden="true">{{ getLifelineIcon('fiftyFifty') }}</span>
           <span class="lifeline-name">{{ getLifelineLabel('fiftyFifty') }}</span>
-          <span class="lifeline-status">{{ result.usedLifelines.fiftyFifty ? '✅' : '❌' }}</span>
+          <span class="lifeline-status" aria-hidden="true">{{ result.usedLifelines.fiftyFifty ? '✅' : '❌' }}</span>
         </div>
-        <div class="lifeline-stat" [class.used]="result.usedLifelines.askAudience">
-          <span class="lifeline-icon">{{ getLifelineIcon('askAudience') }}</span>
+        <div class="lifeline-stat" 
+             role="listitem"
+             [class.used]="result.usedLifelines.askAudience"
+             [attr.aria-label]="'Ask the Audience lifeline: ' + (result.usedLifelines.askAudience ? 'Used' : 'Not used')">
+          <span class="lifeline-icon" aria-hidden="true">{{ getLifelineIcon('askAudience') }}</span>
           <span class="lifeline-name">{{ getLifelineLabel('askAudience') }}</span>
-          <span class="lifeline-status">{{ result.usedLifelines.askAudience ? '✅' : '❌' }}</span>
+          <span class="lifeline-status" aria-hidden="true">{{ result.usedLifelines.askAudience ? '✅' : '❌' }}</span>
         </div>
-        <div class="lifeline-stat" [class.used]="result.usedLifelines.phoneFriend">
-          <span class="lifeline-icon">{{ getLifelineIcon('phoneFriend') }}</span>
+        <div class="lifeline-stat" 
+             role="listitem"
+             [class.used]="result.usedLifelines.phoneFriend"
+             [attr.aria-label]="'Phone a Friend lifeline: ' + (result.usedLifelines.phoneFriend ? 'Used' : 'Not used')">
+          <span class="lifeline-icon" aria-hidden="true">{{ getLifelineIcon('phoneFriend') }}</span>
           <span class="lifeline-name">{{ getLifelineLabel('phoneFriend') }}</span>
-          <span class="lifeline-status">{{ result.usedLifelines.phoneFriend ? '✅' : '❌' }}</span>
+          <span class="lifeline-status" aria-hidden="true">{{ result.usedLifelines.phoneFriend ? '✅' : '❌' }}</span>
         </div>
       </div>
     </div>
 
     <!-- Review Answers Section -->
     @if (showReview) {
-      <div class="review-section">
-        <h3>Answer Review</h3>
-        <div class="review-list">
+      <div class="review-section" role="region" aria-label="Answer review">
+        <h3 id="review-heading">Answer Review</h3>
+        <div class="review-list" role="list" aria-labelledby="review-heading">
           @for (question of result.answeredQuestions; track question.questionId; let i = $index) {
-            <div class="review-item" [class.correct]="question.correct" [class.incorrect]="!question.correct">
+            <div class="review-item" 
+                 role="listitem"
+                 [class.correct]="question.correct" 
+                 [class.incorrect]="!question.correct">
               <div class="review-header">
                 <span class="review-question-number">Question {{ i + 1 }}</span>
                 <span class="review-difficulty">{{ question.difficulty }}</span>
@@ -86,18 +100,22 @@
                 <span class="review-result">{{ question.correct ? '✅ Correct' : '❌ Incorrect' }}</span>
               </div>
               <div class="review-question-text">{{ question.question }}</div>
-              <div class="review-options">
+              <div class="review-options" role="list" aria-label="Answer options">
                 @for (option of question.options; track option; let optIdx = $index) {
                   <div class="review-option"
+                       role="listitem"
                        [class.chosen]="optIdx === question.chosenOption"
-                       [class.correct-answer]="optIdx === question.correctOption">
+                       [class.correct-answer]="optIdx === question.correctOption"
+                       [attr.aria-label]="getOptionLetter(optIdx) + ': ' + option + 
+                                          (optIdx === question.chosenOption ? ' (Your answer)' : '') + 
+                                          (optIdx === question.correctOption ? ' (Correct answer)' : '')">
                     <span class="option-letter">{{ getOptionLetter(optIdx) }}:</span>
                     <span class="option-text">{{ option }}</span>
                     @if (optIdx === question.chosenOption && optIdx !== question.correctOption) {
-                      <span class="option-badge incorrect-badge">Your Answer</span>
+                      <span class="option-badge incorrect-badge" aria-hidden="true">Your Answer</span>
                     }
                     @if (optIdx === question.correctOption) {
-                      <span class="option-badge correct-badge">Correct Answer</span>
+                      <span class="option-badge correct-badge" aria-hidden="true">Correct Answer</span>
                     }
                   </div>
                 }
@@ -109,20 +127,27 @@
     }
 
     <!-- Action Buttons -->
-    <div class="action-buttons">
-      <button class="action-button review-button" (click)="onReviewAnswers()">
+    <div class="action-buttons" role="group" aria-label="Game actions">
+      <button class="action-button review-button" 
+              (click)="onReviewAnswers()"
+              aria-expanded="{{ showReview }}"
+              aria-controls="review-section">
         {{ showReview ? '▲ Hide Review' : '▼ Review Answers' }}
       </button>
-      <button class="action-button play-again-button" (click)="onPlayAgain()">
+      <button class="action-button play-again-button" 
+              (click)="onPlayAgain()"
+              aria-label="Start a new game">
         ✨ Play Again ✨
       </button>
-      <button class="action-button share-button" (click)="onShare()">
+      <button class="action-button share-button" 
+              (click)="onShare()"
+              aria-label="Share your results">
         📤 Share Results
       </button>
     </div>
 
     <!-- Decorations -->
-    <div class="summary-decorations">
+    <div class="summary-decorations" aria-hidden="true">
       @if (result.endReason === 'WIN') {
         <div class="celebration">🎆 🎇 ✨ 🎉 🎊 ✨ 🎇 🎆</div>
       }
