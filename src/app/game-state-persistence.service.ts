@@ -44,9 +44,10 @@ export class GameStatePersistenceService {
   private useLocalStorage = false;
   private saveTimeout: any = null;
   private readonly DEBOUNCE_MS = 500;
+  private dbReady: Promise<void>;
 
   constructor() {
-    this.initializeDB();
+    this.dbReady = this.initializeDB();
   }
 
   /**
@@ -59,29 +60,34 @@ export class GameStatePersistenceService {
       return;
     }
 
-    try {
-      const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
+    return new Promise<void>((resolve) => {
+      try {
+        const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
 
-      request.onerror = () => {
-        console.warn('IndexedDB failed to open, falling back to localStorage');
+        request.onerror = () => {
+          console.warn('IndexedDB failed to open, falling back to localStorage');
+          this.useLocalStorage = true;
+          resolve();
+        };
+
+        request.onsuccess = (event) => {
+          this.db = (event.target as IDBOpenDBRequest).result;
+          resolve();
+        };
+
+        request.onupgradeneeded = (event) => {
+          const db = (event.target as IDBOpenDBRequest).result;
+          if (!db.objectStoreNames.contains(this.STORE_NAME)) {
+            const objectStore = db.createObjectStore(this.STORE_NAME, { keyPath: 'gameKey' });
+            objectStore.createIndex('lastSaved', 'lastSaved', { unique: false });
+          }
+        };
+      } catch (error) {
+        console.error('Error initializing IndexedDB:', error);
         this.useLocalStorage = true;
-      };
-
-      request.onsuccess = (event) => {
-        this.db = (event.target as IDBOpenDBRequest).result;
-      };
-
-      request.onupgradeneeded = (event) => {
-        const db = (event.target as IDBOpenDBRequest).result;
-        if (!db.objectStoreNames.contains(this.STORE_NAME)) {
-          const objectStore = db.createObjectStore(this.STORE_NAME, { keyPath: 'gameKey' });
-          objectStore.createIndex('lastSaved', 'lastSaved', { unique: false });
-        }
-      };
-    } catch (error) {
-      console.error('Error initializing IndexedDB:', error);
-      this.useLocalStorage = true;
-    }
+        resolve();
+      }
+    });
   }
 
   /**
@@ -112,6 +118,9 @@ export class GameStatePersistenceService {
    * Save game state to storage
    */
   async saveState(state: GameState): Promise<void> {
+    // Wait for DB to be ready
+    await this.dbReady;
+    
     state.lastSaved = Date.now();
     
     if (this.useLocalStorage || !this.db) {
@@ -167,6 +176,9 @@ export class GameStatePersistenceService {
    * Load game state from storage
    */
   async loadState(gameKey: string): Promise<GameState | null> {
+    // Wait for DB to be ready
+    await this.dbReady;
+    
     if (this.useLocalStorage || !this.db) {
       return this.loadFromLocalStorage(gameKey);
     }
