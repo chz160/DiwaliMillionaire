@@ -93,7 +93,7 @@
 
         <!-- Answer Options -->
         <div class="answers-grid">
-          @for (option of getCurrentQuestion()?.options; track option; let i = $index) {
+          @for (option of getRenderedOptions(); track option; let i = $index) {
             <button 
               class="answer-button"
               [class.selected]="selectedAnswer() === i"

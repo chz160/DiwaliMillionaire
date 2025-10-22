@@ -22,6 +22,11 @@ describe('GameStatePersistenceService', () => {
     }
   ];
 
+  const mockRenderOrder: number[][] = [
+    [0, 1, 2, 3], // Question 1 - no shuffle
+    [2, 0, 3, 1]  // Question 2 - shuffled
+  ];
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [GameStatePersistenceService]
@@ -62,7 +67,7 @@ describe('GameStatePersistenceService', () => {
   describe('createInitialState', () => {
     it('should create initial state with correct structure', () => {
       const gameKey = 'test_key_123';
-      const state = service.createInitialState(gameKey, mockQuestions);
+      const state = service.createInitialState(gameKey, mockQuestions, mockRenderOrder);
 
       expect(state.schemaVersion).toBe(1);
       expect(state.gameKey).toBe(gameKey);
@@ -80,13 +85,14 @@ describe('GameStatePersistenceService', () => {
       expect(state.phoneFriendActive).toBe(false);
       expect(state.soundEnabled).toBe(true);
       expect(state.lastSaved).toBeDefined();
+      expect(state.renderOrder).toEqual(mockRenderOrder);
     });
   });
 
   describe('saveState and loadState', () => {
     it('should save and load state correctly', async () => {
       const gameKey = 'test_save_load';
-      const state = service.createInitialState(gameKey, mockQuestions);
+      const state = service.createInitialState(gameKey, mockQuestions, mockRenderOrder);
       state.currentQuestionIndex = 2;
       state.lifelinesUsed.fiftyFifty = true;
 
@@ -98,6 +104,7 @@ describe('GameStatePersistenceService', () => {
       expect(loaded!.currentQuestionIndex).toBe(2);
       expect(loaded!.lifelinesUsed.fiftyFifty).toBe(true);
       expect(loaded!.questions).toEqual(mockQuestions);
+      expect(loaded!.renderOrder).toEqual(mockRenderOrder);
     });
 
     it('should return null for non-existent game key', async () => {
@@ -107,7 +114,7 @@ describe('GameStatePersistenceService', () => {
 
     it('should update lastSaved timestamp on save', async () => {
       const gameKey = 'test_timestamp';
-      const state = service.createInitialState(gameKey, mockQuestions);
+      const state = service.createInitialState(gameKey, mockQuestions, mockRenderOrder);
       const originalTimestamp = state.lastSaved;
 
       // Wait a bit to ensure timestamp changes
@@ -123,7 +130,7 @@ describe('GameStatePersistenceService', () => {
   describe('scheduleSave', () => {
     it('should debounce multiple save calls', (done) => {
       const gameKey = 'test_debounce';
-      const state = service.createInitialState(gameKey, mockQuestions);
+      const state = service.createInitialState(gameKey, mockQuestions, mockRenderOrder);
       
       // Call scheduleSave multiple times rapidly
       state.currentQuestionIndex = 1;
@@ -147,7 +154,7 @@ describe('GameStatePersistenceService', () => {
   describe('deleteState', () => {
     it('should delete saved state', async () => {
       const gameKey = 'test_delete';
-      const state = service.createInitialState(gameKey, mockQuestions);
+      const state = service.createInitialState(gameKey, mockQuestions, mockRenderOrder);
 
       await service.saveState(state);
       let loaded = await service.loadState(gameKey);
@@ -164,8 +171,8 @@ describe('GameStatePersistenceService', () => {
       const key1 = 'test_list_1';
       const key2 = 'test_list_2';
       
-      const state1 = service.createInitialState(key1, mockQuestions);
-      const state2 = service.createInitialState(key2, mockQuestions);
+      const state1 = service.createInitialState(key1, mockQuestions, mockRenderOrder);
+      const state2 = service.createInitialState(key2, mockQuestions, mockRenderOrder);
 
       await service.saveState(state1);
       await service.saveState(state2);
@@ -180,7 +187,7 @@ describe('GameStatePersistenceService', () => {
 
     it('should include lastSaved timestamp in session list', async () => {
       const gameKey = 'test_list_timestamp';
-      const state = service.createInitialState(gameKey, mockQuestions);
+      const state = service.createInitialState(gameKey, mockQuestions, mockRenderOrder);
 
       await service.saveState(state);
       const sessions = await service.listSessions();
@@ -217,7 +224,7 @@ describe('GameStatePersistenceService', () => {
 
     it('should reject state with wrong schema version', async () => {
       const gameKey = 'test_old_schema';
-      const state = service.createInitialState(gameKey, mockQuestions);
+      const state = service.createInitialState(gameKey, mockQuestions, mockRenderOrder);
       
       // Manually set old schema version
       (state as any).schemaVersion = 0;
@@ -232,7 +239,7 @@ describe('GameStatePersistenceService', () => {
   describe('complex state scenarios', () => {
     it('should preserve lifeline state', async () => {
       const gameKey = 'test_lifelines';
-      const state = service.createInitialState(gameKey, mockQuestions);
+      const state = service.createInitialState(gameKey, mockQuestions, mockRenderOrder);
       
       state.lifelinesUsed = {
         fiftyFifty: true,
@@ -256,7 +263,7 @@ describe('GameStatePersistenceService', () => {
 
     it('should preserve answered questions', async () => {
       const gameKey = 'test_answers';
-      const state = service.createInitialState(gameKey, mockQuestions);
+      const state = service.createInitialState(gameKey, mockQuestions, mockRenderOrder);
       
       state.answeredQuestions = [
         {
@@ -283,7 +290,7 @@ describe('GameStatePersistenceService', () => {
 
     it('should preserve timer state', async () => {
       const gameKey = 'test_timer';
-      const state = service.createInitialState(gameKey, mockQuestions);
+      const state = service.createInitialState(gameKey, mockQuestions, mockRenderOrder);
       
       state.timerStartTime = Date.now() - 30000; // 30 seconds ago
       state.timerDuration = 60000; // 60 seconds total

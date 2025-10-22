@@ -25,6 +25,8 @@ export interface GameState {
   timerDuration: number | null;
   soundEnabled: boolean;
   lastSaved: number;
+  /** Render order for each question's options (indices 0-3 shuffled per question) */
+  renderOrder: number[][];
 }
 
 /**
@@ -254,7 +256,8 @@ export class GameStatePersistenceService {
       'currentQuestionIndex',
       'questions',
       'lifelinesUsed',
-      'answeredQuestions'
+      'answeredQuestions',
+      'renderOrder'
     ];
 
     for (const field of requiredFields) {
@@ -395,7 +398,7 @@ export class GameStatePersistenceService {
   /**
    * Create initial game state
    */
-  createInitialState(gameKey: string, questions: Question[]): GameState {
+  createInitialState(gameKey: string, questions: Question[], renderOrder: number[][]): GameState {
     return {
       schemaVersion: this.SCHEMA_VERSION,
       gameKey,
@@ -414,7 +417,8 @@ export class GameStatePersistenceService {
       timerStartTime: null,
       timerDuration: null,
       soundEnabled: true,
-      lastSaved: Date.now()
+      lastSaved: Date.now(),
+      renderOrder
     };
   }
 
