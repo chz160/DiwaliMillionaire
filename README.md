@@ -35,12 +35,16 @@ npm install
 cp .env.example .env
 ```
 
-Edit `.env` and add your Google Analytics measurement ID if you want to track usage analytics:
+Edit `.env` and add your analytics tokens if you want to track usage:
 ```
+# Google Analytics 4 (optional)
 GA_MEASUREMENT_ID=G-XXXXXXXXXX
+
+# Cloudflare Web Analytics (optional)
+CF_ANALYTICS_TOKEN=xxxxxxxxxxxxxxxxxxxx
 ```
 
-**Note:** Analytics tracking is optional. If `GA_MEASUREMENT_ID` is not set, the application will run without analytics. Analytics will also not load if the user has "Do Not Track" enabled in their browser.
+**Note:** Analytics tracking is optional. If `GA_MEASUREMENT_ID` or `CF_ANALYTICS_TOKEN` are not set, the application will run without the respective analytics. Google Analytics will also not load if the user has "Do Not Track" enabled in their browser. Cloudflare Web Analytics provides privacy-first analytics without cookies.
 
 ### Development
 
@@ -62,20 +66,31 @@ The build artifacts will be stored in the `dist/` directory.
 
 **Environment Variables for Production:**
 
-When building for production, you can set the `GA_MEASUREMENT_ID` environment variable:
+When building for production, you can set analytics environment variables:
 
 ```bash
-# Linux/macOS
+# Linux/macOS (with both analytics providers)
+GA_MEASUREMENT_ID=G-XXXXXXXXXX CF_ANALYTICS_TOKEN=xxxxxxxxxxxxxxxxxxxx npm run build
+
+# Just Google Analytics
 GA_MEASUREMENT_ID=G-XXXXXXXXXX npm run build
 
+# Just Cloudflare Web Analytics
+CF_ANALYTICS_TOKEN=xxxxxxxxxxxxxxxxxxxx npm run build
+
 # Windows (PowerShell)
-$env:GA_MEASUREMENT_ID="G-XXXXXXXXXX"; npm run build
+$env:GA_MEASUREMENT_ID="G-XXXXXXXXXX"; $env:CF_ANALYTICS_TOKEN="xxxxxxxxxxxxxxxxxxxx"; npm run build
 
 # Windows (CMD)
-set GA_MEASUREMENT_ID=G-XXXXXXXXXX && npm run build
+set GA_MEASUREMENT_ID=G-XXXXXXXXXX && set CF_ANALYTICS_TOKEN=xxxxxxxxxxxxxxxxxxxx && npm run build
 ```
 
-For deployment platforms (Netlify, Vercel, GitHub Pages, etc.), set the environment variable in your platform's settings.
+For deployment platforms (Netlify, Vercel, GitHub Pages, etc.), set the environment variables in your platform's settings.
+
+**Getting Analytics Tokens:**
+
+- **Google Analytics:** Create a GA4 property in your [Google Analytics account](https://analytics.google.com/) and copy the Measurement ID (format: G-XXXXXXXXXX)
+- **Cloudflare Web Analytics:** Enable Web Analytics in your [Cloudflare dashboard](https://dash.cloudflare.com/) under Analytics > Web Analytics, and copy the beacon token
 
 ### Testing
 
