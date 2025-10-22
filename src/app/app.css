@@ -395,6 +395,15 @@
   50% { transform: translateY(-10px); }
 }
 
+/* Version Number */
+.version-number {
+  text-align: center;
+  padding: 10px 0 20px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.3);
+  font-family: monospace;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .game-screen {
