@@ -59,6 +59,17 @@
           </button>
         </div>
 
+        <!-- Walk Away Button -->
+        <div class="walk-away-container">
+          <button 
+            class="walk-away-button"
+            [disabled]="selectedAnswer() !== null || currentQuestionIndex() === 0"
+            (click)="walkAway()"
+            title="Walk away with your current prize">
+            💰 Walk Away ({{ getCurrentPrize() }})
+          </button>
+        </div>
+
         <!-- Question Display -->
         <div class="question-container">
           <div class="question-number">
@@ -128,8 +139,12 @@
             <div 
               class="money-level"
               [class.current]="level.current"
-              [class.reached]="level.reached">
-              {{ level.amount }}
+              [class.reached]="level.reached"
+              [class.checkpoint]="level.isCheckpoint">
+              <span class="prize-amount">{{ level.amount }}</span>
+              @if (level.isCheckpoint) {
+                <span class="checkpoint-indicator">✓</span>
+              }
             </div>
           }
         </div>
