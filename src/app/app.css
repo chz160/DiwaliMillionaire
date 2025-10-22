@@ -444,7 +444,7 @@
   backdrop-filter: blur(10px);
   display: flex;
   flex-direction: column;
-  max-height: 80vh;
+  max-height: clamp(400px, 60vh, 650px);
 }
 
 .money-ladder h3 {
