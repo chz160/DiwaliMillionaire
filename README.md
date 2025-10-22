@@ -21,8 +21,8 @@ A Diwali-themed quiz game based on "Who Wants to Be a Millionaire" for use at IR
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/chz160/DiwaliMillionare.git
-cd DiwaliMillionare
+git clone https://github.com/chz160/DiwaliMillionaire.git
+cd DiwaliMillionaire
 ```
 
 2. Install dependencies:
