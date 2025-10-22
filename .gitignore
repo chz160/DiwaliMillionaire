@@ -41,6 +41,11 @@ __screenshots__/
 # Auto-generated environment files
 /src/environments/environment.ts
 
+# Environment variables (contains secrets)
+.env
+.env.local
+.env.*.local
+
 # System files
 .DS_Store
 Thumbs.db
