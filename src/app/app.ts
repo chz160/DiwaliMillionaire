@@ -7,6 +7,8 @@ import { GameResultService } from './game-result.service';
 import { GameSessionResult, AnsweredQuestion } from './game-session-result.model';
 import { GameSummaryComponent } from './game-summary.component';
 import { environment } from '../environments/environment';
+import { GameStatePersistenceService, GameState } from './game-state-persistence.service';
+import { GameUrlService } from './game-url.service';
 
 interface MoneyLevel {
   amount: string;
@@ -26,11 +28,16 @@ export class App implements OnInit, AfterViewInit {
   private lifelineService = inject(LifelineService);
   private prizeLadderService = inject(PrizeLadderService);
   private gameResultService = inject(GameResultService);
+  private persistenceService = inject(GameStatePersistenceService);
+  private urlService = inject(GameUrlService);
   
   @ViewChild('moneyLadderLevels') moneyLadderLevels?: ElementRef<HTMLDivElement>;
   
   protected readonly title = signal('Who Wants To Be Diwali Millionaire');
   protected readonly version = environment.version;
+  
+  // Current game key for persistence
+  private currentGameKey = signal<string | null>(null);
   
   currentQuestionIndex = signal(0);
   gameStarted = signal(false);
@@ -61,10 +68,19 @@ export class App implements OnInit, AfterViewInit {
   moneyLadder = signal<MoneyLevel[]>([]);
   
   ngOnInit() {
-    this.questionsService.loadQuestions().subscribe(questions => {
-      const selectedQuestions = this.questionsService.selectQuestionsWithProgression(questions);
-      this.questions.set(selectedQuestions);
-    });
+    // Check for existing game session in URL
+    const gameKeyFromUrl = this.urlService.getGameKeyFromUrl();
+    
+    if (gameKeyFromUrl) {
+      // Try to restore saved session
+      this.restoreGameSession(gameKeyFromUrl);
+    } else {
+      // No saved session, load questions normally
+      this.questionsService.loadQuestions().subscribe(questions => {
+        const selectedQuestions = this.questionsService.selectQuestionsWithProgression(questions);
+        this.questions.set(selectedQuestions);
+      });
+    }
     
     // Initialize money ladder from prize ladder service
     this.initializeMoneyLadder();
@@ -94,6 +110,18 @@ export class App implements OnInit, AfterViewInit {
     this.currentQuestionIndex.set(0);
     this.gameOver.set(false);
     this.updateMoneyLadder();
+    
+    // Generate new game key and save initial state
+    const gameKey = this.persistenceService.generateGameKey();
+    this.currentGameKey.set(gameKey);
+    this.urlService.setGameKeyInUrl(gameKey);
+    
+    // Create and save initial game state
+    const initialState = this.persistenceService.createInitialState(
+      gameKey,
+      this.questions()
+    );
+    this.persistenceService.scheduleSave(initialState);
   }
   
   selectAnswer(index: number) {
@@ -120,6 +148,9 @@ export class App implements OnInit, AfterViewInit {
       
       this.answeredQuestions.update(prev => [...prev, answeredQuestion]);
       
+      // Save state after answering
+      this.saveCurrentState();
+      
       if (isCorrect) {
         // Mark current level as reached
         const ladder = this.moneyLadder();
@@ -142,6 +173,9 @@ export class App implements OnInit, AfterViewInit {
       this.answeredCorrectly.set(false);
       this.clearLifelineEffects();
       this.updateMoneyLadder();
+      
+      // Save state when moving to next question
+      this.saveCurrentState();
     } else {
       // All questions answered correctly - WIN!
       const ladder = this.moneyLadder();
@@ -205,6 +239,14 @@ export class App implements OnInit, AfterViewInit {
     this.sessionResult.set(result);
     this.gameOver.set(true);
     
+    // Delete saved state when game ends to prevent resuming a finished game
+    const gameKey = this.currentGameKey();
+    if (gameKey) {
+      this.persistenceService.deleteState(gameKey).catch(error => {
+        console.error('Failed to delete game state on game end:', error);
+      });
+    }
+    
     // Emit analytics event
     this.emitAnalyticsEvent(result);
   }
@@ -239,6 +281,17 @@ export class App implements OnInit, AfterViewInit {
     this.resetLifelines();
     this.initializeMoneyLadder();
     this.gameResultService.clearResult();
+    
+    // Clear game key and URL
+    const gameKey = this.currentGameKey();
+    if (gameKey) {
+      // Delete saved state
+      this.persistenceService.deleteState(gameKey).catch(error => {
+        console.error('Failed to delete game state:', error);
+      });
+    }
+    this.currentGameKey.set(null);
+    this.urlService.removeGameKeyFromUrl();
   }
   
   getCurrentQuestion(): Question | null {
@@ -279,6 +332,9 @@ export class App implements OnInit, AfterViewInit {
     const toRemove = this.lifelineService.useFiftyFifty(currentQuestion);
     this.removedOptions.set(toRemove);
     this.lifelinesUsed.update(state => ({ ...state, fiftyFifty: true }));
+    
+    // Save state after using lifeline
+    this.saveCurrentState();
   }
   
   useAskAudience() {
@@ -290,6 +346,9 @@ export class App implements OnInit, AfterViewInit {
     const votes = this.lifelineService.useAskAudience(currentQuestion);
     this.audienceVotes.set(votes);
     this.lifelinesUsed.update(state => ({ ...state, askAudience: true }));
+    
+    // Save state after using lifeline
+    this.saveCurrentState();
   }
   
   usePhoneFriend() {
@@ -301,6 +360,9 @@ export class App implements OnInit, AfterViewInit {
     const hint = this.lifelineService.usePhoneFriend(currentQuestion);
     this.phoneFriendHint.set(hint);
     this.lifelinesUsed.update(state => ({ ...state, phoneFriend: true }));
+    
+    // Save state after using lifeline
+    this.saveCurrentState();
   }
   
   resetLifelines() {
@@ -327,5 +389,96 @@ export class App implements OnInit, AfterViewInit {
     if (!votes) return 0;
     const vote = votes.find(v => v.optionIndex === index);
     return vote ? vote.percentage : 0;
+  }
+
+  /**
+   * Save current game state to persistence
+   */
+  private saveCurrentState(): void {
+    const gameKey = this.currentGameKey();
+    if (!gameKey || this.gameOver()) {
+      return; // Don't save if no game key or game is over
+    }
+
+    const state: GameState = {
+      schemaVersion: 1,
+      gameKey,
+      currentQuestionIndex: this.currentQuestionIndex(),
+      selectedQuestionIds: this.questions().map(q => q.id),
+      questions: this.questions(),
+      lifelinesUsed: this.lifelinesUsed(),
+      removedOptions: this.removedOptions(),
+      audienceVotesActive: this.audienceVotes() !== null,
+      phoneFriendActive: this.phoneFriendHint() !== null,
+      answeredQuestions: this.answeredQuestions().map(aq => ({
+        questionId: aq.questionId,
+        correct: aq.correct,
+        chosenOption: aq.chosenOption,
+        correctOption: aq.correctOption
+      })),
+      timerStartTime: null,
+      timerDuration: null,
+      soundEnabled: true,
+      lastSaved: Date.now()
+    };
+
+    this.persistenceService.scheduleSave(state);
+  }
+
+  /**
+   * Restore game session from saved state
+   */
+  private async restoreGameSession(gameKey: string): Promise<void> {
+    try {
+      const savedState = await this.persistenceService.loadState(gameKey);
+      
+      if (savedState) {
+        // Restore game state
+        this.currentGameKey.set(gameKey);
+        this.questions.set(savedState.questions);
+        this.currentQuestionIndex.set(savedState.currentQuestionIndex);
+        this.lifelinesUsed.set(savedState.lifelinesUsed);
+        this.removedOptions.set(savedState.removedOptions);
+        
+        // Restore answered questions (convert back to AnsweredQuestion format)
+        const restoredAnswers: AnsweredQuestion[] = savedState.answeredQuestions.map(aq => ({
+          questionId: aq.questionId,
+          correct: aq.correct,
+          chosenOption: aq.chosenOption,
+          correctOption: aq.correctOption,
+          difficulty: savedState.questions.find(q => q.id === aq.questionId)?.difficulty || 'Unknown',
+          question: savedState.questions.find(q => q.id === aq.questionId)?.question || '',
+          options: savedState.questions.find(q => q.id === aq.questionId)?.options || [],
+          prize: this.prizeLadderService.getPrizeForQuestion(aq.questionId)
+        }));
+        this.answeredQuestions.set(restoredAnswers);
+        
+        // Start the game in the restored state
+        this.gameStarted.set(true);
+        this.gameOver.set(false);
+        this.updateMoneyLadder();
+        
+        console.log('Game session restored successfully');
+      } else {
+        // No saved state found, start fresh
+        console.log('No saved state found for game key:', gameKey);
+        this.urlService.removeGameKeyFromUrl();
+        this.loadFreshQuestions();
+      }
+    } catch (error) {
+      console.error('Failed to restore game session:', error);
+      this.urlService.removeGameKeyFromUrl();
+      this.loadFreshQuestions();
+    }
+  }
+
+  /**
+   * Load fresh questions when no saved state exists
+   */
+  private loadFreshQuestions(): void {
+    this.questionsService.loadQuestions().subscribe(questions => {
+      const selectedQuestions = this.questionsService.selectQuestionsWithProgression(questions);
+      this.questions.set(selectedQuestions);
+    });
   }
 }
