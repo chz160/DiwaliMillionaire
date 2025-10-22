@@ -1,51 +1,51 @@
-ID,Question,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
-1,Diwali is also known as the Festival of…,Lights,Colors,Water,Fire,A
-2,Which religion primarily celebrates Diwali?,Buddhism,Hinduism,Islam,Christianity,B
-3,Diwali is celebrated in which country the most?,China,USA,India,Japan,C
-4,What is the main symbol of Diwali?,Pumpkin,Christmas Tree,Diya Lamp,Lantern Fish,C
-5,People light diyas to symbolize…,Good over evil,Summer,A new year,Harvest,A
-6,What sweet is commonly eaten during Diwali?,Cupcake,Gulab Jamun,Ice Cream,Pretzel,B
-7,What is a diya made of?,Metal,Wood,Clay,Plastic,C
-8,What do children often set off during Diwali?,Confetti,Fireworks,Balloons,Paper Planes,B
-9,Which season is Diwali celebrated in India?,Winter,Monsoon,Summer,Autumn,D
-10,What color is most associated with Diwali decorations?,Blue,Yellow,Black,Gold,D
-11,Diwali is celebrated over how many days traditionally?,3,4,5,6,C
-12,What goddess is worshipped on the main day of Diwali?,Saraswati,Kali,Lakshmi,Durga,C
-13,Which god returns to Ayodhya on Diwali according to the Ramayana?,Krishna,Shiva,Rama,Vishnu,C
-14,The lighting of lamps signifies the victory of…,Darkness over light,Evil over good,Light over darkness,Rain over sun,C
-15,People often create colorful floor designs called…,Rangoli,Mandala,Mehndi,Doodle,A
-16,What do people clean before Diwali?,Cars,Streets,Homes,Clothes,C
-17,What is commonly exchanged among friends and family during Diwali?,Firecrackers,Money,Sweets and gifts,Toys,C
-18,"In North India, Diwali marks the return of Rama from…",Lanka,Ayodhya,Dwaraka,Mathura,A
-19,People often play which game of chance during Diwali?,Ludo,Cards,Chess,Carrom,B
-20,What type of oil is often used in diyas?,Olive oil,Coconut oil,Mustard oil,Lamp oil,C
-21,Diwali celebrates the defeat of which demon king?,Kumbhakarna,Ravana,Bali,Duryodhana,B
-22,"The word ‘Diwali’ comes from the Sanskrit word ‘Deepavali,’ meaning…",Row of lights,Festival of sweets,Return of gods,Sacred night,A
-23,In which Hindu month is Diwali celebrated?,Chaitra,Bhadrapada,Kartika,Magha,C
-24,Which epic narrates the return of Rama that Diwali celebrates?,Mahabharata,Bhagavad Gita,Ramayana,Upanishads,C
-25,What does the Lakshmi Puja primarily involve?,Fasting,Dancing,Lighting candles,Prayers and offerings,D
-26,"In some regions, which demon is associated with Naraka Chaturdashi (day before Diwali)?",Vritra,Narakasura,Hiranyakashipu,Kamsa,B
-27,Which region of India celebrates Kali Puja on the same night as Diwali?,Punjab,Gujarat,West Bengal,Kerala,C
-28,Which Hindu god killed Narakasura before Diwali?,Shiva,Rama,Krishna,Ganesha,C
-29,What animal did Ravana ride in mythological depictions?,Horse,Peacock,Chariot,Pushpaka Vimana,D
-30,Which festival follows Diwali and involves brothers visiting their sisters?,Raksha Bandhan,Bhai Dooj,Holi,Dussehra,B
-31,"In Gujarat, Diwali also marks the start of…",Spring,Harvest,New Year,Holi,C
-32,"In Jainism, Diwali marks the nirvana of…",Parshvanatha,Mahavira,Buddha,Neminatha,B
-33,"Which Sikh Guru was released from prison on the day of Diwali, commemorated as Bandi Chhor Divas?",Guru Nanak,Guru Hargobind,Guru Gobind Singh,Guru Arjan Dev,B
-34,What major city in India is especially famous for its grand Diwali celebrations with ghats lit up with diyas?,Ayodhya,Varanasi,Delhi,Mumbai,B
-35,"The festival of Annakut, celebrated after Diwali, involves…",Fasting,Offering a mountain of food,Planting trees,Giving alms,B
-36,"In Nepal, Diwali is called…",Tihar,Deshain,Holi,Pongal,A
-37,What does Govardhan Puja celebrate?,Marriage of Rama,Victory of Krishna over Indra,Return of Lakshmi,Birth of Ganesha,B
-38,What is another name for the first day of Diwali when people buy gold and silver?,Bhai Dooj,Govardhan Puja,Dhanteras,Kartik Purnima,C
-39,Which state celebrates Vagh Baras as part of Diwali festivities?,Kerala,Punjab,Gujarat,Bihar,C
-40,In which language does “Deepavali” originate?,Sanskrit,Tamil,Hindi,Marathi,A
-41,The new moon night of Diwali is called…,Amavasya,Purnima,Navami,Ekadashi,A
-42,The Lakshmi Puja during Diwali is believed to bring…,Good fortune,Rainfall,Knowledge,Strength,A
-43,Which ancient text mentions the celebration of Deepavali?,Rig Veda,Skanda Purana,Arthashastra,Chanakya Sutra,B
-44,Diwali is usually celebrated in which Gregorian months?,January–February,March–April,October–November,December,C
-45,"According to tradition, people keep their doors open on Diwali to…",Let guests in,Let Lakshmi enter,Let air flow,Keep away evil,B
-46,What is traditionally placed at the entrance of houses during Diwali for good luck?,Lemon,Rangoli,Toran,Ash gourd,C
-47,Which Indian Prime Minister started celebrating Diwali with soldiers at borders?,Jawaharlal Nehru,Indira Gandhi,Narendra Modi,Rajiv Gandhi,C
-48,What does bursting crackers symbolically represent in traditional belief?,Warding off evil spirits,Attracting attention,Celebrating birthdays,Making noise,A
-49,"The five days of Diwali are Dhanteras, Naraka Chaturdashi, Lakshmi Puja, Govardhan Puja, and…",Holi,Bhai Dooj,Raksha Bandhan,Pongal,B
-50,Which animal is honored on the second day of Tihar in Nepal?,Dog,Cow,Elephant,Cat,A
+ID,Question,OptionA,OptionB,OptionC,OptionD,CorrectAnswer,Difficulty
+1,Diwali is also known as the Festival of…,Lights,Colors,Water,Fire,A,Easy
+2,Which religion primarily celebrates Diwali?,Buddhism,Hinduism,Islam,Christianity,B,Easy
+3,Diwali is celebrated in which country the most?,China,USA,India,Japan,C,Easy
+4,What is the main symbol of Diwali?,Pumpkin,Christmas Tree,Diya Lamp,Lantern Fish,C,Easy
+5,People light diyas to symbolize…,Good over evil,Summer,A new year,Harvest,A,Easy
+6,What sweet is commonly eaten during Diwali?,Cupcake,Gulab Jamun,Ice Cream,Pretzel,B,Easy
+7,What is a diya made of?,Metal,Wood,Clay,Plastic,C,Easy
+8,What do children often set off during Diwali?,Confetti,Fireworks,Balloons,Paper Planes,B,Easy
+9,Which season is Diwali celebrated in India?,Winter,Monsoon,Summer,Autumn,D,Easy
+10,What color is most associated with Diwali decorations?,Blue,Yellow,Black,Gold,D,Easy
+11,Diwali is celebrated over how many days traditionally?,3,4,5,6,C,Intermediate
+12,What goddess is worshipped on the main day of Diwali?,Saraswati,Kali,Lakshmi,Durga,C,Intermediate
+13,Which god returns to Ayodhya on Diwali according to the Ramayana?,Krishna,Shiva,Rama,Vishnu,C,Intermediate
+14,The lighting of lamps signifies the victory of…,Darkness over light,Evil over good,Light over darkness,Rain over sun,C,Intermediate
+15,People often create colorful floor designs called…,Rangoli,Mandala,Mehndi,Doodle,A,Intermediate
+16,What do people clean before Diwali?,Cars,Streets,Homes,Clothes,C,Intermediate
+17,What is commonly exchanged among friends and family during Diwali?,Firecrackers,Money,Sweets and gifts,Toys,C,Intermediate
+18,"In North India, Diwali marks the return of Rama from…",Lanka,Ayodhya,Dwaraka,Mathura,A,Intermediate
+19,People often play which game of chance during Diwali?,Ludo,Cards,Chess,Carrom,B,Intermediate
+20,What type of oil is often used in diyas?,Olive oil,Coconut oil,Mustard oil,Lamp oil,C,Intermediate
+21,Diwali celebrates the defeat of which demon king?,Kumbhakarna,Ravana,Bali,Duryodhana,B,Hard
+22,"The word ‘Diwali’ comes from the Sanskrit word ‘Deepavali,’ meaning…",Row of lights,Festival of sweets,Return of gods,Sacred night,A,Hard
+23,In which Hindu month is Diwali celebrated?,Chaitra,Bhadrapada,Kartika,Magha,C,Hard
+24,Which epic narrates the return of Rama that Diwali celebrates?,Mahabharata,Bhagavad Gita,Ramayana,Upanishads,C,Hard
+25,What does the Lakshmi Puja primarily involve?,Fasting,Dancing,Lighting candles,Prayers and offerings,D,Hard
+26,"In some regions, which demon is associated with Naraka Chaturdashi (day before Diwali)?",Vritra,Narakasura,Hiranyakashipu,Kamsa,B,Hard
+27,Which region of India celebrates Kali Puja on the same night as Diwali?,Punjab,Gujarat,West Bengal,Kerala,C,Hard
+28,Which Hindu god killed Narakasura before Diwali?,Shiva,Rama,Krishna,Ganesha,C,Hard
+29,What animal did Ravana ride in mythological depictions?,Horse,Peacock,Chariot,Pushpaka Vimana,D,Hard
+30,Which festival follows Diwali and involves brothers visiting their sisters?,Raksha Bandhan,Bhai Dooj,Holi,Dussehra,B,Hard
+31,"In Gujarat, Diwali also marks the start of…",Spring,Harvest,New Year,Holi,C,Very Hard
+32,"In Jainism, Diwali marks the nirvana of…",Parshvanatha,Mahavira,Buddha,Neminatha,B,Very Hard
+33,"Which Sikh Guru was released from prison on the day of Diwali, commemorated as Bandi Chhor Divas?",Guru Nanak,Guru Hargobind,Guru Gobind Singh,Guru Arjan Dev,B,Very Hard
+34,What major city in India is especially famous for its grand Diwali celebrations with ghats lit up with diyas?,Ayodhya,Varanasi,Delhi,Mumbai,B,Very Hard
+35,"The festival of Annakut, celebrated after Diwali, involves…",Fasting,Offering a mountain of food,Planting trees,Giving alms,B,Very Hard
+36,"In Nepal, Diwali is called…",Tihar,Deshain,Holi,Pongal,A,Very Hard
+37,What does Govardhan Puja celebrate?,Marriage of Rama,Victory of Krishna over Indra,Return of Lakshmi,Birth of Ganesha,B,Very Hard
+38,What is another name for the first day of Diwali when people buy gold and silver?,Bhai Dooj,Govardhan Puja,Dhanteras,Kartik Purnima,C,Very Hard
+39,Which state celebrates Vagh Baras as part of Diwali festivities?,Kerala,Punjab,Gujarat,Bihar,C,Very Hard
+40,In which language does “Deepavali” originate?,Sanskrit,Tamil,Hindi,Marathi,A,Very Hard
+41,The new moon night of Diwali is called…,Amavasya,Purnima,Navami,Ekadashi,A,Expert
+42,The Lakshmi Puja during Diwali is believed to bring…,Good fortune,Rainfall,Knowledge,Strength,A,Expert
+43,Which ancient text mentions the celebration of Deepavali?,Rig Veda,Skanda Purana,Arthashastra,Chanakya Sutra,B,Expert
+44,Diwali is usually celebrated in which Gregorian months?,January–February,March–April,October–November,December,C,Expert
+45,"According to tradition, people keep their doors open on Diwali to…",Let guests in,Let Lakshmi enter,Let air flow,Keep away evil,B,Expert
+46,What is traditionally placed at the entrance of houses during Diwali for good luck?,Lemon,Rangoli,Toran,Ash gourd,C,Expert
+47,Which Indian Prime Minister started celebrating Diwali with soldiers at borders?,Jawaharlal Nehru,Indira Gandhi,Narendra Modi,Rajiv Gandhi,C,Expert
+48,What does bursting crackers symbolically represent in traditional belief?,Warding off evil spirits,Attracting attention,Celebrating birthdays,Making noise,A,Expert
+49,"The five days of Diwali are Dhanteras, Naraka Chaturdashi, Lakshmi Puja, Govardhan Puja, and…",Holi,Bhai Dooj,Raksha Bandhan,Pongal,B,Expert
+50,Which animal is honored on the second day of Tihar in Nepal?,Dog,Cow,Elephant,Cat,A,Expert
