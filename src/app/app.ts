@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, inject } from '@angular/core';
+import { Component, signal, OnInit, inject, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { QuestionsService, Question } from './questions.service';
 import { LifelineService, LifelineState, AudienceVote, PhoneFriendHint } from './lifeline.service';
@@ -21,11 +21,13 @@ interface MoneyLevel {
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App implements OnInit {
+export class App implements OnInit, AfterViewInit {
   private questionsService = inject(QuestionsService);
   private lifelineService = inject(LifelineService);
   private prizeLadderService = inject(PrizeLadderService);
   private gameResultService = inject(GameResultService);
+  
+  @ViewChild('moneyLadderLevels') moneyLadderLevels?: ElementRef<HTMLDivElement>;
   
   protected readonly title = signal('Who Wants To Be Diwali Millionaire');
   protected readonly version = environment.version;
@@ -66,6 +68,11 @@ export class App implements OnInit {
     
     // Initialize money ladder from prize ladder service
     this.initializeMoneyLadder();
+  }
+  
+  ngAfterViewInit() {
+    // Scroll to the first level when view is initialized
+    this.scrollToCurrentLevel();
   }
   
   private initializeMoneyLadder() {
@@ -155,6 +162,30 @@ export class App implements OnInit {
       // Levels with higher index (lower amounts) that we've passed are reached
       reached: index > currentLevel || level.reached
     })));
+    
+    // Scroll to the current level after updating the ladder
+    setTimeout(() => this.scrollToCurrentLevel(), 0);
+  }
+  
+  private scrollToCurrentLevel() {
+    if (!this.moneyLadderLevels) return;
+    
+    const container = this.moneyLadderLevels.nativeElement;
+    const currentLevelElement = container.querySelector('.money-level.current') as HTMLElement;
+    
+    if (currentLevelElement) {
+      const containerHeight = container.clientHeight;
+      const elementTop = currentLevelElement.offsetTop;
+      const elementHeight = currentLevelElement.offsetHeight;
+      
+      // Scroll to position the current element near the center of the container
+      const scrollPosition = elementTop - (containerHeight / 2) + (elementHeight / 2);
+      
+      container.scrollTo({
+        top: scrollPosition,
+        behavior: 'smooth'
+      });
+    }
   }
   
   endGame() {
