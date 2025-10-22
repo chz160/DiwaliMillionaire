@@ -32,11 +32,15 @@ const version = generateVersion();
 // Get GA_MEASUREMENT_ID from environment variable (if set)
 const gaMeasurementId = process.env.GA_MEASUREMENT_ID || '';
 
+// Get CF_ANALYTICS_TOKEN from environment variable (if set)
+const cfAnalyticsToken = process.env.CF_ANALYTICS_TOKEN || '';
+
 // Create the environment file content
 const envFileContent = `// This file is auto-generated during build. Do not edit manually.
 export const environment = {
   version: '${version}',
-  gaMeasurementId: '${gaMeasurementId}'
+  gaMeasurementId: '${gaMeasurementId}',
+  cfAnalyticsToken: '${cfAnalyticsToken}'
 };
 `;
 
