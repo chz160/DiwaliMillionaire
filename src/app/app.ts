@@ -10,6 +10,7 @@ import { environment } from '../environments/environment';
 import { GameStatePersistenceService, GameState } from './game-state-persistence.service';
 import { GameUrlService } from './game-url.service';
 import { shuffleOptions } from './seeded-random.util';
+import { AnalyticsService } from './analytics.service';
 
 interface MoneyLevel {
   amount: string;
@@ -31,6 +32,7 @@ export class App implements OnInit, AfterViewInit {
   private gameResultService = inject(GameResultService);
   private persistenceService = inject(GameStatePersistenceService);
   private urlService = inject(GameUrlService);
+  private analyticsService = inject(AnalyticsService);
   
   @ViewChild('moneyLadderLevels') moneyLadderLevels?: ElementRef<HTMLDivElement>;
   
@@ -120,6 +122,9 @@ export class App implements OnInit, AfterViewInit {
     this.currentGameKey.set(gameKey);
     this.urlService.setGameKeyInUrl(gameKey);
     
+    // Track game start event
+    this.analyticsService.trackGameStart(gameKey);
+    
     // Generate render order for all questions
     const questions = this.questions();
     const renderOrderForSession = questions.map(q => 
@@ -190,6 +195,12 @@ export class App implements OnInit, AfterViewInit {
       this.clearLifelineEffects();
       this.updateMoneyLadder();
       
+      // Track question progress
+      const gameKey = this.currentGameKey();
+      if (gameKey) {
+        this.analyticsService.trackQuestionProgress(nextIndex + 1, gameKey);
+      }
+      
       // Save state when moving to next question
       this.saveCurrentState();
     } else {
@@ -255,8 +266,26 @@ export class App implements OnInit, AfterViewInit {
     this.sessionResult.set(result);
     this.gameOver.set(true);
     
-    // Delete saved state when game ends to prevent resuming a finished game
+    // Track game end event
     const gameKey = this.currentGameKey();
+    if (gameKey) {
+      let outcome: 'walk_away' | 'win' | 'wrong_answer';
+      if (reason === 'WIN') {
+        outcome = 'win';
+      } else if (reason === 'WALK_AWAY') {
+        outcome = 'walk_away';
+      } else {
+        outcome = 'wrong_answer';
+      }
+      
+      this.analyticsService.trackGameEnd(
+        outcome,
+        this.currentQuestionIndex() + 1,
+        gameKey
+      );
+    }
+    
+    // Delete saved state when game ends to prevent resuming a finished game
     if (gameKey) {
       this.persistenceService.deleteState(gameKey).catch(error => {
         console.error('Failed to delete game state on game end:', error);
@@ -370,6 +399,16 @@ export class App implements OnInit, AfterViewInit {
     this.removedOptions.set(toRemoveRendered);
     this.lifelinesUsed.update(state => ({ ...state, fiftyFifty: true }));
     
+    // Track lifeline usage
+    const gameKey = this.currentGameKey();
+    if (gameKey) {
+      this.analyticsService.trackLifelineUsed(
+        'fifty_fifty',
+        this.currentQuestionIndex() + 1,
+        gameKey
+      );
+    }
+    
     // Save state after using lifeline
     this.saveCurrentState();
   }
@@ -393,6 +432,16 @@ export class App implements OnInit, AfterViewInit {
     this.audienceVotes.set(votesRendered);
     this.lifelinesUsed.update(state => ({ ...state, askAudience: true }));
     
+    // Track lifeline usage
+    const gameKey = this.currentGameKey();
+    if (gameKey) {
+      this.analyticsService.trackLifelineUsed(
+        'ask_audience',
+        this.currentQuestionIndex() + 1,
+        gameKey
+      );
+    }
+    
     // Save state after using lifeline
     this.saveCurrentState();
   }
@@ -415,6 +464,16 @@ export class App implements OnInit, AfterViewInit {
     
     this.phoneFriendHint.set(hintRendered);
     this.lifelinesUsed.update(state => ({ ...state, phoneFriend: true }));
+    
+    // Track lifeline usage
+    const gameKey = this.currentGameKey();
+    if (gameKey) {
+      this.analyticsService.trackLifelineUsed(
+        'phone_friend',
+        this.currentQuestionIndex() + 1,
+        gameKey
+      );
+    }
     
     // Save state after using lifeline
     this.saveCurrentState();
