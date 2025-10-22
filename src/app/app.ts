@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { QuestionsService, Question } from './questions.service';
 import { LifelineService, LifelineState, AudienceVote, PhoneFriendHint } from './lifeline.service';
 import { PrizeLadderService, PrizeLadderLevel } from './prize-ladder.service';
+import { GameResultService } from './game-result.service';
+import { GameSessionResult, AnsweredQuestion } from './game-session-result.model';
+import { GameSummaryComponent } from './game-summary.component';
 import { environment } from '../environments/environment';
 
 interface MoneyLevel {
@@ -14,7 +17,7 @@ interface MoneyLevel {
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule],
+  imports: [CommonModule, GameSummaryComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -22,6 +25,7 @@ export class App implements OnInit {
   private questionsService = inject(QuestionsService);
   private lifelineService = inject(LifelineService);
   private prizeLadderService = inject(PrizeLadderService);
+  private gameResultService = inject(GameResultService);
   
   protected readonly title = signal('Who Wants To Be Diwali Millionaire');
   protected readonly version = environment.version;
@@ -33,6 +37,12 @@ export class App implements OnInit {
   answeredCorrectly = signal(false);
   
   questions = signal<Question[]>([]);
+  
+  // Session result for summary screen
+  sessionResult = signal<GameSessionResult | null>(null);
+  
+  // Track answered questions for the session
+  answeredQuestions = signal<AnsweredQuestion[]>([]);
   
   // Lifeline state
   lifelinesUsed = signal<LifelineState>({
@@ -85,8 +95,25 @@ export class App implements OnInit {
     
     setTimeout(() => {
       const currentQuestion = this.questions()[this.currentQuestionIndex()];
-      if (index === currentQuestion.correctAnswer) {
-        this.answeredCorrectly.set(true);
+      const isCorrect = index === currentQuestion.correctAnswer;
+      this.answeredCorrectly.set(isCorrect);
+      
+      // Record the answered question
+      const questionIndex = this.currentQuestionIndex();
+      const answeredQuestion: AnsweredQuestion = {
+        questionId: currentQuestion.id,
+        correct: isCorrect,
+        chosenOption: index,
+        correctOption: currentQuestion.correctAnswer,
+        difficulty: currentQuestion.difficulty,
+        question: currentQuestion.question,
+        options: currentQuestion.options,
+        prize: this.prizeLadderService.getPrizeForQuestion(questionIndex + 1)
+      };
+      
+      this.answeredQuestions.update(prev => [...prev, answeredQuestion]);
+      
+      if (isCorrect) {
         // Mark current level as reached
         const ladder = this.moneyLadder();
         const currentLevel = ladder.length - 1 - this.currentQuestionIndex();
@@ -94,10 +121,8 @@ export class App implements OnInit {
         this.moneyLadder.set([...ladder]);
         setTimeout(() => this.nextQuestion(), 1500);
       } else {
-        this.answeredCorrectly.set(false);
-        // Use checkpoint logic to determine final prize
-        // The guaranteed prize is based on the last checkpoint passed
-        setTimeout(() => this.endGame(), 1500);
+        // Wrong answer - end game
+        setTimeout(() => this.endGameWithReason('WRONG'), 1500);
       }
     }, 1000);
   }
@@ -111,12 +136,12 @@ export class App implements OnInit {
       this.clearLifelineEffects();
       this.updateMoneyLadder();
     } else {
-      // All questions answered correctly - mark final prize as reached
+      // All questions answered correctly - WIN!
       const ladder = this.moneyLadder();
       const finalLevel = ladder.length - 1 - this.currentQuestionIndex();
       ladder[finalLevel].reached = true;
       this.moneyLadder.set([...ladder]);
-      this.endGame();
+      this.endGameWithReason('WIN');
     }
   }
   
@@ -136,9 +161,40 @@ export class App implements OnInit {
     this.gameOver.set(true);
   }
   
+  endGameWithReason(reason: 'WIN' | 'WRONG' | 'WALK_AWAY' | 'TIMEOUT') {
+    // Create session result
+    const result = this.gameResultService.createSessionResult(
+      reason,
+      this.currentQuestionIndex(),
+      this.answeredQuestions(),
+      this.lifelinesUsed(),
+      this.questions().length
+    );
+    
+    this.sessionResult.set(result);
+    this.gameOver.set(true);
+    
+    // Emit analytics event
+    this.emitAnalyticsEvent(result);
+  }
+  
+  private emitAnalyticsEvent(result: GameSessionResult) {
+    // This would integrate with an actual analytics service
+    // For now, just log to console
+    const stats = this.gameResultService.getStatistics(result);
+    console.log('Game End Analytics:', {
+      end_reason: result.endReason,
+      final_prize: result.finalPrize,
+      highest_question: stats.highestQuestion,
+      lifelines_used: result.usedLifelines,
+      accuracy: stats.accuracy,
+      timestamp: result.timestamp
+    });
+  }
+  
   walkAway() {
     // Player chooses to walk away with current prize
-    this.gameOver.set(true);
+    this.endGameWithReason('WALK_AWAY');
   }
   
   resetGame() {
@@ -147,8 +203,11 @@ export class App implements OnInit {
     this.currentQuestionIndex.set(0);
     this.selectedAnswer.set(null);
     this.answeredCorrectly.set(false);
+    this.answeredQuestions.set([]);
+    this.sessionResult.set(null);
     this.resetLifelines();
     this.initializeMoneyLadder();
+    this.gameResultService.clearResult();
   }
   
   getCurrentQuestion(): Question | null {

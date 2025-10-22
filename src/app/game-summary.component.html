@@ -1,0 +1,132 @@
+<div class="game-summary-container">
+  <div class="summary-screen">
+    <!-- Headline -->
+    <div class="summary-header">
+      <h2 class="summary-headline">{{ getHeadline() }}</h2>
+      <div class="summary-subheadline">
+        <span class="end-reason">{{ getEndReasonDescription() }}</span>
+        <span class="question-reached"> • Reached Q{{ getStatistics().highestQuestion }}/{{ result.totalQuestions }}</span>
+      </div>
+    </div>
+
+    <!-- Prize Display -->
+    <div class="final-prize-display">
+      <div class="prize-label">Final Winnings</div>
+      <div class="final-prize-amount">{{ result.finalPrize }}</div>
+    </div>
+
+    <!-- Progress Ladder -->
+    <div class="progress-section">
+      <h3>Your Progress</h3>
+      <div class="ladder-progress">
+        @for (question of result.answeredQuestions; track question.questionId; let i = $index) {
+          <div class="ladder-step" 
+               [class.correct]="question.correct"
+               [class.incorrect]="!question.correct">
+            <span class="step-number">Q{{ i + 1 }}</span>
+            <span class="step-prize">{{ question.prize }}</span>
+            <span class="step-indicator">{{ question.correct ? '✅' : '❌' }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-section">
+      <h3>Session Statistics</h3>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-label">Correct Answers</div>
+          <div class="stat-value">{{ getStatistics().correctAnswers }} / {{ getStatistics().totalAttempted }}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Accuracy</div>
+          <div class="stat-value">{{ getStatistics().accuracy }}%</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Highest Question</div>
+          <div class="stat-value">Q{{ getStatistics().highestQuestion }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lifelines Usage -->
+    <div class="lifelines-section">
+      <h3>Lifelines Used</h3>
+      <div class="lifelines-grid">
+        <div class="lifeline-stat" [class.used]="result.usedLifelines.fiftyFifty">
+          <span class="lifeline-icon">{{ getLifelineIcon('fiftyFifty') }}</span>
+          <span class="lifeline-name">{{ getLifelineLabel('fiftyFifty') }}</span>
+          <span class="lifeline-status">{{ result.usedLifelines.fiftyFifty ? '✅' : '❌' }}</span>
+        </div>
+        <div class="lifeline-stat" [class.used]="result.usedLifelines.askAudience">
+          <span class="lifeline-icon">{{ getLifelineIcon('askAudience') }}</span>
+          <span class="lifeline-name">{{ getLifelineLabel('askAudience') }}</span>
+          <span class="lifeline-status">{{ result.usedLifelines.askAudience ? '✅' : '❌' }}</span>
+        </div>
+        <div class="lifeline-stat" [class.used]="result.usedLifelines.phoneFriend">
+          <span class="lifeline-icon">{{ getLifelineIcon('phoneFriend') }}</span>
+          <span class="lifeline-name">{{ getLifelineLabel('phoneFriend') }}</span>
+          <span class="lifeline-status">{{ result.usedLifelines.phoneFriend ? '✅' : '❌' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Review Answers Section -->
+    @if (showReview) {
+      <div class="review-section">
+        <h3>Answer Review</h3>
+        <div class="review-list">
+          @for (question of result.answeredQuestions; track question.questionId; let i = $index) {
+            <div class="review-item" [class.correct]="question.correct" [class.incorrect]="!question.correct">
+              <div class="review-header">
+                <span class="review-question-number">Question {{ i + 1 }}</span>
+                <span class="review-difficulty">{{ question.difficulty }}</span>
+                <span class="review-prize">{{ question.prize }}</span>
+                <span class="review-result">{{ question.correct ? '✅ Correct' : '❌ Incorrect' }}</span>
+              </div>
+              <div class="review-question-text">{{ question.question }}</div>
+              <div class="review-options">
+                @for (option of question.options; track option; let optIdx = $index) {
+                  <div class="review-option"
+                       [class.chosen]="optIdx === question.chosenOption"
+                       [class.correct-answer]="optIdx === question.correctOption">
+                    <span class="option-letter">{{ getOptionLetter(optIdx) }}:</span>
+                    <span class="option-text">{{ option }}</span>
+                    @if (optIdx === question.chosenOption && optIdx !== question.correctOption) {
+                      <span class="option-badge incorrect-badge">Your Answer</span>
+                    }
+                    @if (optIdx === question.correctOption) {
+                      <span class="option-badge correct-badge">Correct Answer</span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="action-button review-button" (click)="onReviewAnswers()">
+        {{ showReview ? '▲ Hide Review' : '▼ Review Answers' }}
+      </button>
+      <button class="action-button play-again-button" (click)="onPlayAgain()">
+        ✨ Play Again ✨
+      </button>
+      <button class="action-button share-button" (click)="onShare()">
+        📤 Share Results
+      </button>
+    </div>
+
+    <!-- Decorations -->
+    <div class="summary-decorations">
+      @if (result.endReason === 'WIN') {
+        <div class="celebration">🎆 🎇 ✨ 🎉 🎊 ✨ 🎇 🎆</div>
+      }
+      <div class="diwali-decoration">🪔 ✨ 🎆 ✨ 🪔</div>
+    </div>
+  </div>
+</div>

@@ -153,24 +153,11 @@
   }
 
   <!-- Game Over Screen -->
-  @if (gameOver()) {
-    <div class="game-over-screen">
-      <div class="result-message">
-        @if (currentQuestionIndex() === questions().length) {
-          <h2>🎉 Congratulations! 🎉</h2>
-          <p>You've won the game!</p>
-          <div class="final-prize">{{ getCurrentPrize() }}</div>
-        } @else {
-          <h2>Game Over</h2>
-          <p>You won:</p>
-          <div class="final-prize">{{ getCurrentPrize() }}</div>
-        }
-        <button class="restart-button" (click)="resetGame()">
-          Play Again
-        </button>
-      </div>
-      <div class="fireworks">🎆 🎇 ✨ 🎆 🎇</div>
-    </div>
+  @if (gameOver() && sessionResult()) {
+    <app-game-summary 
+      [result]="sessionResult()!"
+      (playAgain)="resetGame()">
+    </app-game-summary>
   }
 
   <!-- Footer decoration -->
