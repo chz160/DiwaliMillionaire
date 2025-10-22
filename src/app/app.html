@@ -135,18 +135,21 @@
       <div class="sidebar">
         <div class="money-ladder">
           <h3>Prize Ladder</h3>
-          @for (level of moneyLadder(); track level.amount) {
-            <div 
-              class="money-level"
-              [class.current]="level.current"
-              [class.reached]="level.reached"
-              [class.checkpoint]="level.isCheckpoint">
-              <span class="prize-amount">{{ level.amount }}</span>
-              @if (level.isCheckpoint) {
-                <span class="checkpoint-indicator">✓</span>
-              }
-            </div>
-          }
+          <div class="money-ladder-levels" #moneyLadderLevels>
+            @for (level of moneyLadder(); track level.amount; let i = $index) {
+              <div 
+                class="money-level"
+                [class.current]="level.current"
+                [class.reached]="level.reached"
+                [class.checkpoint]="level.isCheckpoint"
+                [attr.data-level-index]="i">
+                <span class="prize-amount">{{ level.amount }}</span>
+                @if (level.isCheckpoint) {
+                  <span class="checkpoint-indicator">✓</span>
+                }
+              </div>
+            }
+          </div>
         </div>
       </div>
     </div>
